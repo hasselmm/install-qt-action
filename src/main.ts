@@ -15,6 +15,7 @@ async function run() {
 
       const dir = (core.getInput("dir") || process.env.RUNNER_WORKSPACE) + "/Qt";
       let version = core.getInput("version");
+      const tools = core.getInput("tools");
 
       // Qt installer assumes basic requirements that are not installed by
       // default on Ubuntu.
@@ -44,7 +45,6 @@ async function run() {
         const mirror = core.getInput("mirror");
         const extra = core.getInput("extra");
         const modules = core.getInput("modules");
-        const tools = core.getInput("tools");
 
         //set host automatically if omitted
         if (!host) {
@@ -134,6 +134,26 @@ async function run() {
       core.exportVariable('QT_PLUGIN_PATH', qtPath + '/plugins');
       core.exportVariable('QML2_IMPORT_PATH', qtPath + '/qml');
       core.addPath(qtPath + "/bin");
+
+      // Set environment variables for known tools
+      if (tools) {
+        tools.split(" ").forEach(element => {
+          let elements = element.split(",");
+
+          switch (elements[0]) {
+            case "tools_ninja":
+              core.exportVariable("NINJA_PATH", dir + "/Tools/Ninja");
+              core.addPath(dir + "/Tools/Ninja");
+              break;
+
+            case "tools_mingw":
+              let mingw = elements[2].replace(/^qt\.tools\.[^_]+_/, "");
+              core.exportVariable(mingw.toUpperCase() + "_PATH", dir + "/Tools/" + mingw);
+              core.addPath(dir + "/Tools/" + mingw + "/bin");
+              break;
+          }
+        });
+      }
     } catch (error) {
       core.setFailed(error.message);
     }
