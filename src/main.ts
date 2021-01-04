@@ -3,13 +3,13 @@ import * as glob from "glob";
 import * as compareVersions from "compare-versions";
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
-import * as setupPython from 'setup-python/lib/find-python'
+import * as setupPython from 'setup-python'
 
 async function run() {
     try {
       if (core.getInput("setup-python") == "true") {
         // Use setup-python to ensure that python >=3.6 is installed
-        const installed = await setupPython.findPythonVersion('>=3.6', 'x64')
+        const installed = await setupPython.finder.findPythonVersion('>=3.6', 'x64')
         core.info(`Successfully setup ${installed.impl} (${installed.version})`)
       }
 
